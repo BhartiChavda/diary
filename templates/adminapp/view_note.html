@@ -1,0 +1,86 @@
+{% extends 'adminapp/admin_base.html' %}
+{% block title %}View Note | AdminHub{% endblock %}
+{% block section_name %}Content Review{% endblock %}
+{% block page_title %}Note Details{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-5xl">
+    <div class="mb-8">
+        <a href="{% url 'manage_notes' %}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Notes
+        </a>
+    </div>
+
+    <div class="glass-card p-12 relative overflow-hidden">
+        <!-- Background Accent -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 opacity-50"></div>
+        
+        <div class="relative z-10">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 pb-12 border-b border-slate-100">
+                <div class="space-y-4">
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider">
+                            {{ note.category.name|default:"Uncategorized" }}
+                        </span>
+                        {% if note.is_shared %}
+                            <span class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider border border-emerald-100">Shared</span>
+                        {% endif %}
+                        {% if note.is_archived %}
+                            <span class="px-3 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider border border-amber-100">Archived</span>
+                        {% endif %}
+                    </div>
+                    <h2 class="text-4xl font-black text-slate-900 tracking-tight leading-tight">{{ note.title }}</h2>
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-500">
+                                {{ note.user.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Created By</p>
+                                <p class="text-sm font-bold text-slate-700 leading-none">{{ note.user.username }}</p>
+                            </div>
+                        </div>
+                        <div class="h-8 w-px bg-slate-100"></div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Timestamp</p>
+                            <p class="text-sm font-bold text-slate-700 leading-none">{{ note.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    {% if note.file %}
+                        <a href="{{ note.file.url }}" target="_blank" class="btn-premium px-8 py-4 text-xs flex items-center gap-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Download Attachment
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'delete_note' note.id %}" onclick="return confirm('Delete this note permanently?')" class="px-8 py-4 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-widest border border-rose-100 hover:bg-rose-600 hover:text-white transition-all">
+                        Delete Note
+                    </a>
+                </div>
+            </div>
+
+            <!-- Content Body -->
+            <div class="grid grid-cols-1 gap-12">
+                {% if note.description %}
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Brief Description</h4>
+                    <p class="text-lg text-slate-600 leading-relaxed italic border-l-4 border-indigo-100 pl-6">{{ note.description }}</p>
+                </div>
+                {% endif %}
+
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Note Content</h4>
+                    <div class="bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-100 min-h-[300px]">
+                        <div class="prose prose-slate max-w-none text-slate-800 leading-loose whitespace-pre-wrap font-medium">
+                            {{ note.content|safe|default:"No text content provided." }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

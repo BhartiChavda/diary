@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Service Integrations | NotesHub{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-6">
+    <div class="mb-8 md:mb-12">
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase mb-4 theme-text">Integrations</h1>
+        <p class="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">Connect your digital workspace with external neural networks</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10">
+        <!-- Sidebar Navigation -->
+        <div class="space-y-6 md:space-y-4">
+            <div class="bg-white border border-slate-100 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm theme-bg theme-border">
+                <div class="space-y-2">
+                    <a href="{% url 'settings' %}" class="w-full block text-left px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-slate-50 transition-all theme-text">
+                        Profile Details
+                    </a>
+                    <a href="{% url 'security_settings' %}" class="w-full block text-left px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-slate-50 transition-all theme-text">
+                        Security Core
+                    </a>
+                    <button class="w-full text-left px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl bg-indigo-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-indigo-100">
+                        Integrations
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Connections -->
+            <div class="bg-white border border-slate-100 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm theme-bg theme-border">
+                <p class="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-2">Network Status</p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span class="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase">Cloud Sync: Active</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 bg-slate-200 rounded-full"></div>
+                        <span class="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase">API Access: Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integrations Area -->
+        <div class="lg:col-span-2 space-y-6 md:space-y-8">
+            <!-- Cloud Storage -->
+            <div class="bg-white border border-slate-100 p-6 md:p-10 rounded-3xl md:rounded-[3.5rem] shadow-xl theme-bg theme-border">
+                <div class="flex items-center justify-between mb-8 md:mb-10">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-black text-slate-900 theme-text uppercase">Cloud Repository</h3>
+                        <p class="text-xs md:text-sm text-slate-500 font-medium">Synchronize your assets across devices</p>
+                    </div>
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl md:rounded-2xl flex items-center justify-center text-indigo-600 flex-shrink-0">
+                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                    </div>
+                </div>
+
+                <div class="space-y-3 md:space-y-4">
+                    <div class="flex items-center justify-between p-4 md:p-6 bg-slate-50 rounded-2xl md:rounded-3xl theme-bg border border-slate-100 theme-border">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12.527 3L3.5 8.213l3.053 2.115L15.58 5.115 12.527 3zM3.5 15.787l9.027 5.213 3.053-2.115-9.027-5.213L3.5 15.787zM20.5 8.213L11.473 3 8.42 5.115l9.027 5.213 3.053-2.115zM20.5 15.787l-9.027 5.213-3.053-2.115 9.027-5.213 3.053-2.115z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm font-black text-slate-900 theme-text">Google Drive</p>
+                                <p class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Automatic Asset Sync</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer">
+                            <div class="w-9 md:w-11 h-5 md:h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 md:after:h-5 after:w-4 md:after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 md:p-6 bg-slate-50 rounded-2xl md:rounded-3xl theme-bg border border-slate-100 theme-border">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-sky-500" fill="currentColor" viewBox="0 0 24 24"><path d="M6 14l12-8H6v8zm12 0l-12 8h12v-8z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm font-black text-slate-900 theme-text">Dropbox</p>
+                                <p class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Legacy Backup Protocol</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only peer">
+                            <div class="w-9 md:w-11 h-5 md:h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 md:after:h-5 after:w-4 md:after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Protocols -->
+            <div class="bg-white border border-slate-100 p-6 md:p-10 rounded-3xl md:rounded-[3.5rem] shadow-xl theme-bg theme-border">
+                <h3 class="text-xl md:text-2xl font-black text-slate-900 mb-6 md:mb-8 theme-text uppercase">Neural Notifications</h3>
+                <div class="space-y-4 md:space-y-6">
+                    <div class="flex items-center justify-between group">
+                        <div>
+                            <p class="text-xs md:text-sm font-black text-slate-900 theme-text">Email Verification Alerts</p>
+                            <p class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Security event triggers</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-indigo-600">Enabled</span>
+                            <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-indigo-600 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between group">
+                        <div>
+                            <p class="text-xs md:text-sm font-black text-slate-900 theme-text">Collaboration Updates</p>
+                            <p class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Shared note interactions</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-300">Disabled</span>
+                            <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-slate-200 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

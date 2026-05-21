@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Verify Account | NotesHub{% endblock %}
+{% block content %}
+<div class="flex-1 flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-white border border-slate-100 p-6 md:p-12 rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.08)] text-center">
+        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-10 text-indigo-600">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3c1.268 0 2.39.234 3.41.659m-4.74 4.891A3 3 0 1115 11c0 .883-.346 1.684-.912 2.276m-1.214 4.967A10.05 10.05 0 0112 21c-4.477 0-8.268-2.943-9.542-7"/></svg>
+        </div>
+        
+        <h2 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tighter uppercase">Verify Email</h2>
+        <p class="text-slate-500 text-sm mb-12 font-medium leading-relaxed px-4">
+            We've sent a 6-digit security code to your email. Please enter it below to activate your account.
+        </p>
+
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <input type="text" name="otp" maxlength="6" required
+                       class="w-full p-6 rounded-3xl input-premium text-center text-4xl font-black tracking-[0.5em] text-indigo-600 focus:border-indigo-600"
+                       placeholder="000000">
+                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Security verification required</p>
+            </div>
+            
+            <button type="submit" class="w-full btn-premium py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl">
+                Verify Account
+            </button>
+        </form>
+
+        <div class="mt-12 pt-10 border-t border-slate-100">
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">
+                Didn't receive code? <a href="#" id="resend-otp-btn" class="text-indigo-600 hover:underline transition ml-2">Resend OTP</a>
+            </p>
+            <span id="resend-status" class="block mt-4 text-[10px] font-black uppercase tracking-wider transition-all duration-300"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resendBtn = document.getElementById('resend-otp-btn');
+    const resendStatus = document.getElementById('resend-status');
+    let cooldown = 30; // 30 seconds cooldown
+    let timer = null;
+
+    function startCooldown() {
+        resendBtn.style.pointerEvents = 'none';
+        resendBtn.style.opacity = '0.5';
+        cooldown = 30;
+        
+        clearInterval(timer);
+        timer = setInterval(() => {
+            if (cooldown <= 0) {
+                clearInterval(timer);
+                resendBtn.style.pointerEvents = 'auto';
+                resendBtn.style.opacity = '1';
+                resendBtn.textContent = 'Resend OTP';
+            } else {
+                resendBtn.textContent = `Resend OTP (${cooldown}s)`;
+                cooldown--;
+            }
+        }, 1000);
+    }
+
+    resendBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        resendStatus.textContent = 'Transmitting new security token...';
+        resendStatus.className = 'block mt-4 text-[10px] font-black uppercase tracking-wider text-indigo-600 animate-pulse';
+
+        fetch("{% url 'resend_otp' %}", {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response error');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                resendStatus.textContent = data.message;
+                resendStatus.className = 'block mt-4 text-[10px] font-black uppercase tracking-wider text-emerald-500';
+                startCooldown();
+            } else {
+                resendStatus.textContent = data.message;
+                resendStatus.className = 'block mt-4 text-[10px] font-black uppercase tracking-wider text-rose-500';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            resendStatus.textContent = 'Connection error. Please check server logs.';
+            resendStatus.className = 'block mt-4 text-[10px] font-black uppercase tracking-wider text-rose-500';
+        });
+    });
+});
+</script>
+{% endblock %}

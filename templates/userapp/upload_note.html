@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}{% if type == 'write' %}Write Note{% else %}Upload Asset{% endif %} | NotesHub{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    .ql-toolbar.ql-snow {
+        border: none !important;
+        background: var(--bg-primary);
+        padding: 1rem !important;
+        border-radius: 1.5rem 1.5rem 0 0 !important;
+    }
+    .ql-container.ql-snow {
+        border: none !important;
+        font-family: inherit !important;
+        font-size: 1rem !important;
+    }
+    .ql-editor {
+        min-height: 300px;
+        padding: 2rem !important;
+        border-radius: 0 0 1.5rem 1.5rem !important;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .ql-editor.ql-blank::before {
+        font-style: normal !important;
+        color: var(--text-secondary) !important;
+        left: 2rem !important;
+    }
+    .ql-snow .ql-stroke {
+        stroke: var(--text-secondary) !important;
+    }
+    .ql-snow .ql-fill {
+        fill: var(--text-secondary) !important;
+    }
+    .ql-snow.ql-toolbar button:hover .ql-stroke,
+    .ql-snow.ql-toolbar button.ql-active .ql-stroke {
+        stroke: #4f46e5 !important;
+    }
+    
+    /* AI Assistant Styles */
+    .ai-btn-float {
+        position: absolute;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 50;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+    }
+    .ai-btn-float:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 20px 30px -10px rgba(99, 102, 241, 0.6);
+    }
+    .ai-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .ai-modal.active {
+        display: flex;
+        animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl w-[calc(100%-2rem)] md:w-full mx-auto my-6 md:my-12 p-6 md:p-12 rounded-[2rem] md:rounded-[3.5rem] shadow-2xl border transition-all duration-300" 
+     style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+    <div class="mb-8 md:mb-12 text-center">
+        <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 rounded-2xl md:rounded-[2rem] flex items-center justify-center mx-auto mb-6 md:mb-8 text-indigo-600">
+            {% if type == 'write' %}
+                <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            {% else %}
+                <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            {% endif %}
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black mb-4 tracking-tighter uppercase leading-tight px-4" style="color: var(--text-primary);">
+            {% if type == 'write' %}Draft New Note{% else %}Upload New Asset{% endif %}
+        </h2>
+        <p class="text-slate-400 text-[9px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.4em] font-black">
+            {% if type == 'write' %}Capture thoughts instantly{% else %}Store documents securely{% endif %}
+        </p>
+    </div>
+    
+    <form method="post" {% if type == 'upload' %}enctype="multipart/form-data"{% endif %} class="space-y-6 md:space-y-10">
+        {% csrf_token %}
+        
+        <!-- Standard Fields -->
+        <div class="space-y-6 md:space-y-10">
+            {% for field in form %}
+                {% if field.name != 'is_archived' and field.name != 'is_shared' %}
+                <div class="group">
+                    <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1 group-focus-within:text-indigo-600 transition-colors">{{ field.label }}</label>
+                    {% if field.name == 'content' %}
+                        <div id="editor-container" class="border border-slate-100 rounded-2xl md:rounded-3xl overflow-hidden shadow-sm relative">
+                            <div id="editor" class="min-h-[250px] md:min-h-[350px]"></div>
+                            <button type="button" id="ai-assistant-btn" class="ai-btn-float !bottom-3 !right-3 md:!bottom-8 md:!right-8 scale-90 md:scale-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span class="hidden sm:inline">AI Assistant</span>
+                                <span class="sm:hidden">AI</span>
+                            </button>
+                        </div>
+                        <div class="hidden">
+                            {{ field }}
+                        </div>
+                        <script>
+                            document.querySelector('[name="{{ field.name }}"]').removeAttribute('required');
+                        </script>
+                    {% else %}
+                        <div class="input-container">
+                            {{ field }}
+                        </div>
+                    {% endif %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-[9px] font-bold mt-2 ml-1 uppercase tracking-wider">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Status Options (Checkboxes) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-6 md:p-8 rounded-2xl md:rounded-3xl border transition-all" 
+             style="background-color: var(--bg-primary); border-color: var(--border-color);">
+            <div class="flex items-center gap-4 group cursor-pointer p-3 rounded-xl border border-transparent hover:border-slate-200 transition-all">
+                {{ form.is_archived }}
+                <div>
+                    <label class="block text-[11px] md:text-xs font-black uppercase tracking-widest" style="color: var(--text-primary);">Archive Note</label>
+                    <p class="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase mt-0.5">Hide from dashboard</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 group cursor-pointer p-3 rounded-xl bg-indigo-50/30 border border-indigo-100/50">
+                {{ form.is_shared }}
+                <div>
+                    <label class="block text-[11px] md:text-xs font-black uppercase tracking-widest text-indigo-600">Public Post</label>
+                    <p class="text-[8px] md:text-[9px] text-slate-500 font-bold uppercase mt-0.5">Submit to blog</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pt-6 md:pt-10 border-t border-slate-50 flex flex-col gap-4">
+            <button type="submit" id="submit-btn" class="w-full btn-premium py-4 md:py-6 rounded-2xl md:rounded-3xl font-black uppercase tracking-[0.2em] text-[12px] md:text-sm shadow-xl active:scale-[0.98] transition-all">
+                {% if type == 'write' %}Save Repository{% else %}Upload Library{% endif %}
+            </button>
+            <a href="{% url 'dashboard' %}" class="text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-indigo-600 transition-colors py-2">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- AI Assistant Modal -->
+<div id="ai-modal" class="ai-modal">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-slate-800">
+        <button id="close-ai-modal" class="absolute top-6 right-6 text-slate-400 hover:text-indigo-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="mb-8">
+            <h3 class="text-2xl font-black uppercase tracking-tight text-slate-800 dark:text-white mb-2">Gemini AI Assistant</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Generate ideas, summarize, or enhance your notes</p>
+        </div>
+        <div class="space-y-6">
+            <textarea id="ai-prompt" class="w-full bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white border-none rounded-2xl p-6 text-sm focus:ring-2 focus:ring-indigo-500 transition-all" rows="4" placeholder="What should Gemini do? (e.g., 'Write a summary of my day', 'Draft a project plan')"></textarea>
+            <div id="ai-loading" class="hidden text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-indigo-600 mt-2">Gemini is thinking...</p>
+            </div>
+            <div class="flex gap-4">
+                <button id="generate-ai-btn" class="flex-1 btn-premium py-4 rounded-2xl font-black uppercase tracking-widest text-[10px]">
+                    Generate Response
+                </button>
+                <button id="analyze-ai-btn" class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all">
+                    Auto-Fill Metadata
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Initialize Quill if the editor element exists
+    var quill;
+    var contentTextarea = document.querySelector('textarea[name="content"]');
+    if (document.getElementById('editor')) {
+        quill = new Quill('#editor', {
+            theme: 'snow',
+            placeholder: 'Capture your innovative thoughts here...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['code-block', 'blockquote'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Set initial content if editing
+        if (contentTextarea && contentTextarea.value) {
+            quill.root.innerHTML = contentTextarea.value;
+        }
+
+        // Real-time Sync
+        quill.on('text-change', function() {
+            if (contentTextarea) {
+                contentTextarea.value = quill.root.innerHTML;
+            }
+        });
+    }
+
+    // AI Assistant Logic
+    const aiModal = document.getElementById('ai-modal');
+    const aiBtn = document.getElementById('ai-assistant-btn');
+    const closeAiBtn = document.getElementById('close-ai-modal');
+    const generateAiBtn = document.getElementById('generate-ai-btn');
+    const analyzeAiBtn = document.getElementById('analyze-ai-btn');
+    const aiPrompt = document.getElementById('ai-prompt');
+    const aiLoading = document.getElementById('ai-loading');
+
+    aiBtn?.addEventListener('click', () => aiModal.classList.add('active'));
+    closeAiBtn?.addEventListener('click', () => aiModal.classList.remove('active'));
+
+    // Close on click outside
+    aiModal.addEventListener('click', (e) => {
+        if (e.target === aiModal) aiModal.classList.remove('active');
+    });
+
+    // Generate Content
+    generateAiBtn?.addEventListener('click', async () => {
+        const prompt = aiPrompt.value.trim();
+        if (!prompt) return;
+
+        aiLoading.classList.remove('hidden');
+        generateAiBtn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "ai_generate" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    prompt: prompt,
+                    context: quill ? quill.root.innerText : ''
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Convert AI markdown-ish or plain text to Quill HTML
+                const newContent = data.content.replace(/\n/g, '<br>');
+                if (quill) {
+                    quill.root.innerHTML += `<div class="ai-generated-content mt-4 p-4 border-l-4 border-indigo-500 bg-indigo-50/10">${newContent}</div>`;
+                }
+                aiModal.classList.remove('active');
+                aiPrompt.value = '';
+            } else {
+                alert(data.error || 'AI generation failed');
+            }
+        } catch (error) {
+            console.error('AI Error:', error);
+            alert('An error occurred while connecting to Gemini.');
+        } finally {
+            aiLoading.classList.add('hidden');
+            generateAiBtn.disabled = false;
+        }
+    });
+
+    // Auto-Fill Metadata (Summary, Title, Tags)
+    analyzeAiBtn?.addEventListener('click', async () => {
+        if (!quill) return;
+        const content = quill.root.innerHTML;
+        if (quill.root.innerText.trim().length < 10) {
+            alert('Please write some content first!');
+            return;
+        }
+
+        aiLoading.classList.remove('hidden');
+        analyzeAiBtn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "ai_process" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ content: content })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Fill form fields
+                const titleField = document.querySelector('input[name="title"]');
+                const descField = document.querySelector('textarea[name="description"]');
+                
+                if (titleField) titleField.value = data.title;
+                if (descField) descField.value = data.summary;
+                
+                // If there's a tags field (adjust based on your actual field names)
+                // document.querySelector('input[name="tags"]')?.value = data.tags;
+
+                aiModal.classList.remove('active');
+                alert('Metadata generated successfully!');
+            } else {
+                alert(data.error || 'AI processing failed');
+            }
+        } catch (error) {
+            console.error('AI Error:', error);
+            alert('An error occurred while connecting to Gemini.');
+        } finally {
+            aiLoading.classList.add('hidden');
+            analyzeAiBtn.disabled = false;
+        }
+    });
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submit-btn');
+        // Sync Quill content to hidden textarea if editor exists
+        if (document.getElementById('editor')) {
+            var contentField = document.querySelector('textarea[name="content"]');
+            if (contentField && typeof quill !== 'undefined') {
+                contentField.value = quill.root.innerHTML;
+                console.log("Content synced to textarea");
+            }
+        }
+
+        btn.classList.add('btn-loading');
+        btn.innerHTML = 'Processing...';
+    });
+</script>
+{% endblock %}

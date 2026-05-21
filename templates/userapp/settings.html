@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Account Settings | NotesHub{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-6">
+    <div class="mb-8 md:mb-12">
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase mb-4 theme-text">System Settings</h1>
+        <p class="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">Personalize your digital workspace environment</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10">
+        <!-- Sidebar Navigation (Settings specific) -->
+        <div class="space-y-6 md:space-y-4">
+            <div class="bg-white border border-slate-100 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm theme-bg theme-border text-center lg:text-left">
+                <div class="flex flex-col items-center mb-6 md:mb-8">
+                    <div class="relative group mb-4 md:mb-6">
+                        {% if user.profile_pic %}
+                            <img src="{{ user.profile_pic.url }}" class="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[2rem] object-cover border-4 border-white shadow-md theme-border">
+                        {% else %}
+                            <div class="w-24 h-24 md:w-32 md:h-32 bg-indigo-600 rounded-2xl md:rounded-[2rem] flex items-center justify-center text-white text-3xl md:text-4xl font-black shadow-md">
+                                {{ user.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 theme-text">{{ user.username }}</h3>
+                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Identity Verified</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <button class="w-full text-left px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl bg-indigo-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-md">
+                        Profile Details
+                    </button>
+                    <a href="{% url 'security_settings' %}" class="w-full block text-left px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-slate-50 transition-all theme-text">
+                        Security Core
+                    </a>
+                </div>
+            </div>
+
+            <!-- Visual Appearance (Theme Selection) -->
+            <div class="bg-white border border-slate-100 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm theme-bg theme-border">
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-2">Visual Core</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="setTheme('light')" class="flex flex-col items-center gap-2 group">
+                        <div class="w-full aspect-square bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:border-indigo-600 transition-all">
+                            <div class="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full shadow-sm border border-slate-100"></div>
+                        </div>
+                        <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400">Light</span>
+                    </button>
+                    <button onclick="setTheme('dark')" class="flex flex-col items-center gap-2 group">
+                        <div class="w-full aspect-square bg-slate-800 border border-slate-700 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:border-indigo-600 transition-all">
+                            <div class="w-5 h-5 md:w-6 md:h-6 bg-slate-700 rounded-full shadow-sm border border-slate-600"></div>
+                        </div>
+                        <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400">Dark</span>
+                    </button>
+                    <button onclick="setTheme('night')" class="flex flex-col items-center gap-2 group">
+                        <div class="w-full aspect-square bg-black border border-neutral-800 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:border-indigo-600 transition-all">
+                            <div class="w-5 h-5 md:w-6 md:h-6 bg-neutral-900 rounded-full shadow-sm border border-neutral-800"></div>
+                        </div>
+                        <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400">Night</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Form Area -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-slate-100 p-8 md:p-12 rounded-3xl md:rounded-[3.5rem] shadow-lg theme-bg theme-border">
+                <form method="post" enctype="multipart/form-data" class="space-y-6 md:space-y-10">
+                    {% csrf_token %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                        <div class="group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">Username</label>
+                            <input type="text" name="username" value="{{ user.username }}" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text" required>
+                        </div>
+                        <div class="group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">Email Protocol</label>
+                            <input type="email" name="email" value="{{ user.email }}" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text" required>
+                        </div>
+                        <div class="group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">First Designation</label>
+                            <input type="text" name="first_name" value="{{ user.first_name }}" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text">
+                        </div>
+                        <div class="group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">Last Designation</label>
+                            <input type="text" name="last_name" value="{{ user.last_name }}" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text">
+                        </div>
+                        <div class="md:col-span-2 group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">Secure Contact</label>
+                            <input type="tel" name="phone" value="{{ user.phone }}" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text">
+                        </div>
+                        <div class="md:col-span-2 group">
+                            <label class="block text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 md:mb-4 ml-1">Visual Identity Asset</label>
+                            <input type="file" name="profile_pic" class="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-medium focus:border-indigo-600 outline-none transition-all theme-bg theme-border theme-text file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                        </div>
+                    </div>
+
+                    <div class="pt-8 md:pt-10 border-t border-slate-50 theme-border flex flex-col sm:flex-row gap-4 md:gap-6">
+                        <button type="submit" class="btn-premium px-10 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-md">
+                            Synchronize Profile
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="px-10 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-100 transition-all text-center theme-bg theme-text">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .input-premium:focus + label {
+        color: var(--indigo-accent);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin | NotesHub{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --bg-main: #f1f5f9;
+            --bg-sidebar: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme='dark'] {
+            --bg-main: #0f172a;
+            --bg-sidebar: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --card-bg: rgba(30, 41, 59, 0.9);
+        }
+
+        [data-theme='night'] {
+            --bg-main: #000000;
+            --bg-sidebar: #0a0a0a;
+            --text-main: #ffffff;
+            --text-muted: #a3a3a3;
+            --border-color: #262626;
+            --card-bg: rgba(10, 10, 10, 0.9);
+        }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.active {
+                transform: translateX(0);
+                box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        @media (min-width: 1025px) {
+            .main-content {
+                padding: 40px;
+            }
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-link:hover {
+            background: var(--bg-main);
+            color: var(--primary);
+        }
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+        }
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+        }
+
+        /* Theme Overrides for standard Tailwind classes */
+        .theme-text { color: var(--text-main); }
+        .theme-bg { background-color: var(--bg-main); }
+        .theme-border { border-color: var(--border-color); }
+        
+        [data-theme='dark'] .bg-white, [data-theme='night'] .bg-white { background-color: var(--bg-sidebar) !important; }
+        [data-theme='dark'] .text-slate-900, [data-theme='night'] .text-slate-900 { color: var(--text-main) !important; }
+        [data-theme='dark'] .text-slate-600, [data-theme='night'] .text-slate-600 { color: var(--text-muted) !important; }
+        [data-theme='dark'] .border-slate-200, [data-theme='night'] .border-slate-200 { border-color: var(--border-color) !important; }
+
+        .btn-premium {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            background: var(--primary-dark);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside id="admin-sidebar" class="admin-sidebar p-6 flex flex-col">
+        <div class="mb-10 px-2 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div class="w-5 h-5 bg-white rounded-md"></div>
+                </div>
+                <span class="text-xl font-black tracking-tighter text-slate-900 uppercase">Admin<span class="text-indigo-600 font-light">Hub</span></span>
+            </a>
+            <button onclick="toggleAdminSidebar()" class="lg:hidden p-2 text-slate-400 hover:text-indigo-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                Dashboard
+            </a>
+            <a href="{% url 'manage_users' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_users' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Users
+            </a>
+            <a href="{% url 'manage_notes' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_notes' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                All Notes
+            </a>
+            <a href="{% url 'public_private_notes' %}" class="nav-link {% if request.resolver_match.url_name == 'public_private_notes' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                Post Visibility
+            </a>
+            <a href="{% url 'pending_approvals' %}" class="nav-link {% if request.resolver_match.url_name == 'pending_approvals' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Pending Blogs
+            </a>
+            <a href="{% url 'manage_categories' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_categories' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01"/></svg>
+                Categories
+            </a>
+            <a href="{% url 'manage_contacts' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_contacts' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                Contacts
+            </a>
+            <a href="{% url 'settings' %}" class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Settings
+            </a>
+            <div class="pt-4 mt-4 border-t border-slate-100">
+                <a href="{% url 'dashboard' %}" target="_blank" class="nav-link">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    View Website
+                </a>
+            </div>
+        </nav>
+
+        <div class="mt-auto border-t border-slate-100 pt-6">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="w-full nav-link text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Header & Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-6">
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">{% block section_name %}Admin Panel{% endblock %}</p>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">{% block page_title %}Dashboard Overview{% endblock %}</h1>
+                </div>
+                <button onclick="toggleAdminSidebar()" class="lg:hidden p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 md:gap-6">
+                <a href="{% url 'dashboard' %}" target="_blank" class="flex-1 md:flex-none justify-center bg-white hover:bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 flex items-center gap-3 transition-all group shadow-sm">
+                    <svg class="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider">Preview Site</span>
+                </a>
+                <div class="hidden sm:flex bg-white px-4 py-2.5 rounded-xl border border-slate-200 items-center gap-3 shadow-sm">
+                    <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider">Live</span>
+                </div>
+                <div class="flex items-center gap-3 bg-white/50 px-3 py-1.5 rounded-2xl border border-white/20">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-black text-slate-900 leading-none">{{ user.username }}</p>
+                        <p class="text-[9px] font-black text-indigo-600 uppercase tracking-widest mt-1">Admin</p>
+                    </div>
+                    {% if user.profile_pic %}
+                        <img src="{{ user.profile_pic.url }}" class="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shadow-md">
+                    {% else %}
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-sm shadow-lg">
+                            {{ user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        {% if messages %}
+            <div class="space-y-4 mb-8">
+                {% for message in messages %}
+                    <div class="p-4 rounded-2xl flex items-center gap-4 {% if message.tags == 'error' %}bg-rose-50 text-rose-600 border border-rose-100{% else %}bg-emerald-50 text-emerald-600 border border-emerald-100{% endif %} animate-bounce">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-sm font-bold tracking-tight">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block admin_content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Theme Management Logic
+        const setTheme = (theme) => {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeUI(theme);
+        };
+
+        const updateThemeUI = (theme) => {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-indigo-600', 'scale-110');
+                if (btn.getAttribute('data-set-theme') === theme) {
+                    btn.classList.add('ring-2', 'ring-indigo-600', 'scale-110');
+                }
+            });
+        };
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        window.addEventListener('load', () => {
+            updateThemeUI(savedTheme);
+        });
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('admin-sidebar').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

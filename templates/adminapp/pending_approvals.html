@@ -1,0 +1,55 @@
+{% extends 'adminapp/admin_base.html' %}
+
+{% block section_name %}Moderation Queue{% endblock %}
+{% block page_title %}Pending Blog Approvals{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    {% if notes %}
+        <div class="grid grid-cols-1 gap-6">
+            {% for note in notes %}
+            <div class="glass-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group hover:border-indigo-500/50 transition-all duration-300">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-xl font-black theme-text tracking-tight">{{ note.title }}</h3>
+                            <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase rounded-md border border-amber-100">Pending Review</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-sm text-slate-500">
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                {{ note.user.username }}
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                {{ note.created_at|date:"M d, Y" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <a href="{% url 'admin_view_note' note.id %}" class="flex-1 md:flex-none px-4 py-2 text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-100 rounded-xl transition-all text-center">Preview</a>
+                    <form action="{% url 'approve_note' note.id %}" method="POST" class="flex-1 md:flex-none">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-600/20">Approve</button>
+                    </form>
+                    <a href="{% url 'reject_note' note.id %}" class="flex-1 md:flex-none px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-rose-600/20 text-center">Reject</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="glass-card p-20 flex flex-col items-center justify-center text-center">
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3 class="text-2xl font-black theme-text mb-2 uppercase tracking-tighter">Queue Clear</h3>
+            <p class="text-slate-500 font-medium">All blog submissions have been processed.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

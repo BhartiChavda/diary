@@ -1,0 +1,173 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.admin.views.decorators import staff_member_required
+from userapp.models import User, Note, Category, Contact
+from django.db.models import Count
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+
+@staff_member_required
+def admin_dashboard(request):
+    total_users = User.objects.filter(is_staff=False).count()
+    total_notes = Note.objects.count()
+    total_categories = Category.objects.count()
+    recent_notes = Note.objects.all().order_by('-created_at')[:5]
+    recent_users = User.objects.filter(is_staff=False).order_by('-date_joined')[:5]
+    
+    return render(request, 'adminapp/dashboard.html', {
+        'total_users': total_users,
+        'total_notes': total_notes,
+        'total_categories': total_categories,
+        'recent_notes': recent_notes,
+        'recent_users': recent_users,
+    })
+
+@staff_member_required
+def manage_users(request):
+    query = request.GET.get('search', '')
+    users = User.objects.filter(is_staff=False).order_by('-date_joined')
+    if query:
+        users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+    
+    return render(request, 'adminapp/users.html', {
+        'users': users,
+        'query': query
+    })
+
+@staff_member_required
+def manage_notes(request):
+    query = request.GET.get('search', '')
+    notes = Note.objects.all().order_by('-created_at')
+    if query:
+        notes = notes.filter(title__icontains=query) | notes.filter(user__username__icontains=query)
+    
+    return render(request, 'adminapp/notes.html', {
+        'notes': notes,
+        'query': query
+    })
+
+@staff_member_required
+def manage_categories(request):
+    categories = Category.objects.all()
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Category.objects.create(name=name)
+            return redirect('manage_categories')
+    return render(request, 'adminapp/categories.html', {'categories': categories})
+
+@staff_member_required
+def view_note(request, note_id):
+    note = Note.objects.get(id=note_id)
+    return render(request, 'adminapp/view_note.html', {'note': note})
+
+@staff_member_required
+def delete_note(request, note_id):
+    note = Note.objects.get(id=note_id)
+    note.delete()
+    messages.success(request, "Note deleted successfully.")
+    return redirect('manage_notes')
+
+@staff_member_required
+def toggle_user_status(request, user_id):
+    user = User.objects.get(id=user_id)
+    user.is_active = not user.is_active
+    user.save()
+    status = "activated" if user.is_active else "blocked"
+    messages.success(request, f"User {user.username} has been {status} successfully.")
+    return redirect('manage_users')
+
+@staff_member_required
+def delete_user(request, user_id):
+    user = User.objects.get(id=user_id)
+    username = user.username
+    user.delete()
+    messages.success(request, f"User {username} and all their notes have been deleted.")
+    return redirect('manage_users')
+
+@staff_member_required
+def edit_user(request, user_id):
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.phone = request.POST.get('phone')
+        user.is_verified = 'is_verified' in request.POST
+        user.save()
+        messages.success(request, f"User {user.username} updated successfully.")
+        return redirect('manage_users')
+    return render(request, 'adminapp/edit_user.html', {'user': user})
+
+@staff_member_required
+def manage_contacts(request):
+    contacts = Contact.objects.all().order_by('-created_at')
+    return render(request, 'adminapp/contacts.html', {'contacts': contacts})
+
+@staff_member_required
+def delete_contact(request, contact_id):
+    contact = Contact.objects.get(id=contact_id)
+    contact.delete()
+    messages.success(request, "Connection request deleted.")
+    return redirect('manage_contacts')
+
+@staff_member_required
+def pending_approvals(request):
+    notes = Note.objects.filter(is_shared=True, is_approved=False).order_by('-created_at')
+    return render(request, 'adminapp/pending_approvals.html', {'notes': notes})
+
+@staff_member_required
+def approve_note(request, note_id):
+    note = get_object_or_404(Note, id=note_id)
+    note.is_approved = True
+    note.save()
+    
+    # Send Email to User
+    try:
+        subject = "Blog Approved: Transmission Successful"
+        message = f"Hello {note.user.username},\n\nYour blog '{note.title}' has been approved by the administrator and is now live on the public blog list.\n\nThank you for contributing to NotesHub!\n\n-- NotesHub Node Automator"
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [note.user.email])
+    except:
+        pass
+        
+    messages.success(request, f"Note '{note.title}' approved and user notified.")
+    return redirect('pending_approvals')
+
+@staff_member_required
+def reject_note(request, note_id):
+    note = get_object_or_404(Note, id=note_id)
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Does not meet community guidelines.')
+        note.is_shared = False
+        note.is_approved = False
+        note.rejection_reason = reason
+        note.save()
+        
+        # Send Email to User
+        try:
+            subject = "Blog Update: Moderation Notice"
+            message = f"Hello {note.user.username},\n\nYour blog '{note.title}' could not be published at this time.\n\nReason: {reason}\n\nYou can update your note and try sharing it again.\n\n-- NotesHub Node Automator"
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [note.user.email])
+        except:
+            pass
+            
+        messages.success(request, f"Note '{note.title}' rejected and user notified.")
+        return redirect('pending_approvals')
+    return render(request, 'adminapp/reject_note.html', {'note': note})
+
+@staff_member_required
+def public_private_notes(request):
+    query = request.GET.get('search', '')
+    public_notes = Note.objects.filter(is_shared=True).order_by('-created_at')
+    private_notes = Note.objects.filter(is_shared=False).order_by('-created_at')
+    
+    if query:
+        public_notes = public_notes.filter(title__icontains=query) | public_notes.filter(user__username__icontains=query)
+        private_notes = private_notes.filter(title__icontains=query) | private_notes.filter(user__username__icontains=query)
+        
+    return render(request, 'adminapp/post_visibility.html', {
+        'public_notes': public_notes,
+        'private_notes': private_notes,
+        'total_public': public_notes.count(),
+        'total_private': private_notes.count(),
+        'query': query,
+    })

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Welcome | NotesHub{% endblock %}
+{% block content %}
+<div class="flex-1 flex flex-col items-center justify-center px-4 md:px-10 text-center relative overflow-hidden py-16 md:py-0">
+    <!-- Abstract Shape -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[800px] h-[400px] md:h-[800px] bg-indigo-500/5 rounded-full blur-[80px] md:blur-[120px] pointer-events-none"></div>
+
+    <div class="z-10 max-w-4xl">
+        <div class="mb-6 md:mb-8 inline-flex items-center gap-2 md:gap-3 px-6 md:px-8 py-2 md:py-3 rounded-full border border-slate-900/5 bg-slate-900 shadow-lg">
+            <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-indigo-400 rounded-full animate-pulse"></span>
+            <span class="text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] text-indigo-100">Modern Digital Notebook</span>
+        </div>
+        
+        <h1 class="text-5xl md:text-9xl font-extrabold tracking-tighter mb-6 md:mb-10 leading-[0.95] md:leading-none text-slate-900">
+            BETTER WAY TO<br>
+            <span class="text-indigo-600 uppercase">NOTE.</span>
+        </h1>
+        
+        <p class="text-lg md:text-3xl text-slate-500 font-medium mb-10 md:mb-16 max-w-3xl mx-auto leading-relaxed px-4">
+            Manage your thoughts, files, and knowledge in one beautiful and secure platform.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 px-6 sm:px-0">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-premium px-10 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl text-sm md:text-lg font-black uppercase tracking-[0.2em] w-full sm:w-auto shadow-md">
+                    My Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn-premium px-10 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl text-sm md:text-lg font-black uppercase tracking-[0.2em] w-full sm:w-auto shadow-md">
+                    Get Started
+                </a>
+                <a href="{% url 'login' %}" class="px-10 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl text-sm md:text-lg font-black uppercase tracking-[0.2em] border border-slate-200 bg-white hover:bg-slate-50 transition w-full sm:w-auto shadow-sm">
+                    Login
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-20 md:mt-32 max-w-6xl w-full z-10 px-6 md:px-0">
+        <div class="bg-white border border-slate-100 p-8 md:p-10 rounded-2xl md:rounded-[3rem] text-left hover:shadow-lg transition-all group">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl md:rounded-2xl mb-6 md:mb-8 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all text-indigo-600">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h4 class="text-lg md:text-xl font-bold mb-3 md:mb-4 uppercase tracking-tight text-slate-900">Secure Vault</h4>
+            <p class="text-xs md:text-sm text-slate-500 leading-relaxed">Your account is protected by email verification, keeping your notes safe.</p>
+        </div>
+        <div class="bg-white border border-slate-100 p-8 md:p-10 rounded-2xl md:rounded-[3rem] text-left hover:shadow-lg transition-all group">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl md:rounded-2xl mb-6 md:mb-8 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all text-indigo-600">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h4 class="text-lg md:text-xl font-bold mb-3 md:mb-4 uppercase tracking-tight text-slate-900">File Storage</h4>
+            <p class="text-xs md:text-sm text-slate-500 leading-relaxed">Easily upload and organize your study materials, documents, and images.</p>
+        </div>
+        <div class="bg-white border border-slate-100 p-8 md:p-10 rounded-2xl md:rounded-[3rem] text-left hover:shadow-lg transition-all group">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl md:rounded-2xl mb-6 md:mb-8 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all text-indigo-600">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 012-2M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <h4 class="text-lg md:text-xl font-bold mb-3 md:mb-4 uppercase tracking-tight text-slate-900">Categories</h4>
+            <p class="text-xs md:text-sm text-slate-500 leading-relaxed">Group your notes into custom categories for quick and easy retrieval.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

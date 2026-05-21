@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up | NotesHub{% endblock %}
+{% block content %}
+<div class="flex-1 flex items-center justify-center p-4 md:p-6 py-8 md:py-12">
+    <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-3xl md:rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
+        
+        <!-- Form Side (Left) -->
+        <div class="lg:col-span-7 p-8 md:p-20 flex flex-col justify-center">
+            <div class="mb-10 md:mb-12">
+                <h3 class="text-3xl md:text-5xl text-slate-900 font-extrabold tracking-tighter mb-4 uppercase">Create Account.</h3>
+                <p class="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">Start your digital notebook journey</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                {% csrf_token %}
+                
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Username</label>
+                    <input type="text" name="username" class="w-full px-5 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all" placeholder="Enter username" required>
+                </div>
+
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Email Address</label>
+                    <input type="email" name="email" class="w-full px-5 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all" placeholder="Enter email" required>
+                </div>
+
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Phone Number</label>
+                    <input type="tel" name="phone" class="w-full px-5 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all" placeholder="Enter phone" required>
+                </div>
+
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Profile Photo</label>
+                    <input type="file" name="profile_pic" class="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-medium focus:border-indigo-600 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                </div>
+
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Password</label>
+                    <input type="password" name="password" class="w-full px-5 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all" placeholder="••••••••" required>
+                </div>
+
+                <div class="space-y-1 md:space-y-2 md:col-span-1">
+                    <label class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="w-full px-5 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-sm font-medium focus:border-indigo-600 outline-none transition-all" placeholder="••••••••" required>
+                </div>
+                
+                <div class="pt-6 md:pt-8 md:col-span-2">
+                    <button type="submit" class="w-full btn-premium py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] md:text-xs shadow-2xl">
+                        Register Account
+                    </button>
+                    <div class="mt-8 text-center">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                            Already have an account? <a href="{% url 'login' %}" class="text-indigo-600 hover:underline transition ml-2">Login</a>
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Side (Right) -->
+        <div class="hidden lg:col-span-5 lg:flex flex-col justify-center p-16 bg-slate-50 text-slate-900 relative border-l border-slate-100">
+            <div class="space-y-12 text-center lg:text-left">
+                <div>
+                    <h4 class="text-3xl font-extrabold tracking-tight mb-4 uppercase text-indigo-600">Smart Storage</h4>
+                    <p class="text-sm font-medium text-slate-500 leading-relaxed">Save your notes securely and access them from any device, anywhere.</p>
+                </div>
+                <div>
+                    <h4 class="text-3xl font-extrabold tracking-tight mb-4 uppercase text-indigo-600">Safe & Secure</h4>
+                    <p class="text-sm font-medium text-slate-500 leading-relaxed">Your data is protected with email OTP verification and high-end encryption.</p>
+                </div>
+                <div>
+                    <h4 class="text-3xl font-extrabold tracking-tight mb-4 uppercase text-indigo-600">Organized</h4>
+                    <p class="text-sm font-medium text-slate-500 leading-relaxed">Categorize your notes easily to keep your workspace clean and efficient.</p>
+                </div>
+            </div>
+            
+            <div class="mt-20 pt-10 border-t border-slate-200 flex items-center gap-6 justify-center lg:justify-start">
+                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center float-anim shadow-sm border border-slate-100">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Data protection active.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

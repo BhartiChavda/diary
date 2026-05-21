@@ -1,0 +1,48 @@
+from django.urls import path
+from django.contrib.auth import views as auth_views
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('signup/', views.signup, name='signup'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('resend-otp/', views.resend_otp, name='resend_otp'),
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('upload/', views.upload_note, name='upload_note'),
+    path('write/', views.write_note, name='write_note'),
+    path('edit/<int:note_id>/', views.edit_note, name='edit_note'),
+    path('archive/<int:note_id>/', views.toggle_archive, name='toggle_archive'),
+    path('share/<int:note_id>/', views.toggle_share, name='toggle_share'),
+    path('pin/<int:note_id>/', views.toggle_pin, name='toggle_pin'),
+    path('favorite/<int:note_id>/', views.toggle_favorite, name='toggle_favorite'),
+    path('restore/<int:note_id>/', views.restore_note, name='restore_note'),
+    path('delete-permanent/<int:note_id>/', views.permanent_delete_note, name='permanent_delete'),
+    path('empty-trash/', views.empty_trash, name='empty_trash'),
+    path('delete/<int:note_id>/', views.delete_note, name='user_delete_note'),
+    path('ai/process/', views.ai_process_note, name='ai_process'),
+    path('ai/generate/', views.ai_generate_content, name='ai_generate'),
+    path('view/<int:note_id>/', views.user_view_note, name='user_view_note'),
+    path('settings/', views.settings, name='settings'),
+    path('security/', views.security_settings, name='security_settings'),
+    path('integrations/', views.integrations_settings, name='integrations_settings'),
+    path('shared/view/<int:note_id>/', views.view_shared_note, name='view_shared_note'),
+
+    # Password Reset URLs
+    path('password-reset/', 
+         auth_views.PasswordResetView.as_view(template_name='userapp/password_reset.html'), 
+         name='password_reset'),
+    path('password-reset/done/', 
+         auth_views.PasswordResetDoneView.as_view(template_name='userapp/password_reset_done.html'), 
+         name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name='userapp/password_reset_confirm.html'), 
+         name='password_reset_confirm'),
+    path('password-reset-complete/', 
+         auth_views.PasswordResetCompleteView.as_view(template_name='userapp/password_reset_complete.html'), 
+         name='password_reset_complete'),
+    path('connect/', views.connect, name='connect'),
+    path('about/', views.about, name='about'),
+    path('blog/', views.blog_list, name='blog_list'),
+]

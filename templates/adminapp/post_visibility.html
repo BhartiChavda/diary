@@ -1,0 +1,222 @@
+{% extends 'adminapp/admin_base.html' %}
+{% block title %}Post Visibility | AdminHub{% endblock %}
+{% block section_name %}Content Security{% endblock %}
+{% block page_title %}Post Visibility Status{% endblock %}
+
+{% block admin_content %}
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-10">
+    <!-- Public Stats -->
+    <div class="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700"></div>
+        <div class="w-16 h-16 bg-emerald-500/15 text-emerald-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        </div>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Public Shared Posts</p>
+            <h3 class="text-3xl font-black text-slate-900 theme-text">{{ total_public }}</h3>
+        </div>
+    </div>
+
+    <!-- Private Stats -->
+    <div class="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700"></div>
+        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Private Local Notes</p>
+            <h3 class="text-3xl font-black text-slate-900 theme-text">{{ total_private }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs & Content -->
+<div class="glass-card overflow-hidden">
+    <!-- Header with Search & Tab Switches -->
+    <div class="p-6 md:p-8 border-b border-slate-100 theme-border flex flex-col md:flex-row justify-between items-center gap-6">
+        <!-- Tab Switches -->
+        <div class="flex bg-slate-100 theme-bg p-1.5 rounded-2xl gap-2 w-full md:w-auto">
+            <button onclick="switchTab('public')" id="tab-btn-public" 
+                    class="flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-sm text-indigo-600">
+                Public Shared ({{ total_public }})
+            </button>
+            <button onclick="switchTab('private')" id="tab-btn-private" 
+                    class="flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600">
+                Private Local ({{ total_private }})
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <form method="GET" class="relative w-full md:w-96">
+            <input type="text" name="search" value="{{ query }}" placeholder="Search posts..." 
+                   class="w-full pl-12 pr-6 py-3.5 rounded-2xl theme-bg border theme-border focus:border-indigo-600 focus:ring-0 transition-all font-medium text-sm theme-text">
+            <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </form>
+    </div>
+
+    <!-- Public Notes Section -->
+    <div id="public-panel" class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="transition-colors" style="background-color: var(--bg-main);">
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Post Title</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Author</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date Shared</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Approval Status</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 theme-border">
+                {% for note in public_notes %}
+                <tr class="hover:bg-indigo-50/20 transition-colors group">
+                    <td class="p-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900 theme-text leading-none mb-1 max-w-[280px] truncate">{{ note.title }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: #{{ note.id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-8">
+                        <p class="text-sm font-bold text-slate-700 theme-text">{{ note.user.username }}</p>
+                    </td>
+                    <td class="p-8">
+                        <p class="text-xs font-bold text-slate-500">{{ note.created_at|date:"M d, Y" }}</p>
+                    </td>
+                    <td class="p-8">
+                        <span class="px-3 py-1 rounded-lg bg-slate-100 theme-bg theme-text text-[9px] font-black uppercase tracking-wider">
+                            {{ note.category.name|default:"General" }}
+                        </span>
+                    </td>
+                    <td class="p-8">
+                        {% if note.is_approved %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/25">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                Approved
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest border border-amber-500/25 animate-pulse">
+                                <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                                Pending Moderation
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="p-8">
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="{% url 'admin_view_note' note.id %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all shadow-sm" title="View Details">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </a>
+                            <a href="{% url 'delete_note' note.id %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm" title="Delete" onclick="return confirm('Permanently delete note {{ note.title }}?')">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="p-20 text-center">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">No public posts found</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Private Notes Section -->
+    <div id="private-panel" class="overflow-x-auto hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="transition-colors" style="background-color: var(--bg-main);">
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Note Title</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Author</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date Created</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                    <th class="p-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 theme-border">
+                {% for note in private_notes %}
+                <tr class="hover:bg-indigo-50/20 transition-colors group">
+                    <td class="p-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900 theme-text leading-none mb-1 max-w-[280px] truncate">{{ note.title }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: #{{ note.id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-8">
+                        <p class="text-sm font-bold text-slate-700 theme-text">{{ note.user.username }}</p>
+                    </td>
+                    <td class="p-8">
+                        <p class="text-xs font-bold text-slate-500">{{ note.created_at|date:"M d, Y" }}</p>
+                    </td>
+                    <td class="p-8">
+                        <span class="px-3 py-1 rounded-lg bg-slate-100 theme-bg theme-text text-[9px] font-black uppercase tracking-wider">
+                            {{ note.category.name|default:"General" }}
+                        </span>
+                    </td>
+                    <td class="p-8">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-[8px] font-black uppercase tracking-widest border border-indigo-500/25">
+                            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                            Private Entry
+                        </span>
+                    </td>
+                    <td class="p-8">
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="{% url 'admin_view_note' note.id %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all shadow-sm" title="View Details">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </a>
+                            <a href="{% url 'delete_note' note.id %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm" title="Delete" onclick="return confirm('Permanently delete note {{ note.title }}?')">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="p-20 text-center">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">No private notes found</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function switchTab(type) {
+        const publicPanel = document.getElementById('public-panel');
+        const privatePanel = document.getElementById('private-panel');
+        const publicBtn = document.getElementById('tab-btn-public');
+        const privateBtn = document.getElementById('tab-btn-private');
+
+        if (type === 'public') {
+            publicPanel.classList.remove('hidden');
+            privatePanel.classList.add('hidden');
+            
+            // Buttons style
+            publicBtn.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-sm text-indigo-600";
+            privateBtn.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600";
+        } else {
+            publicPanel.classList.add('hidden');
+            privatePanel.classList.remove('hidden');
+            
+            // Buttons style
+            publicBtn.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600";
+            privateBtn.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-sm text-indigo-600";
+        }
+    }
+</script>
+{% endblock %}
