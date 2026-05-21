@@ -65,7 +65,7 @@ def signup(request):
                 messages.success(request, 'OTP sent to your email. Please verify to continue.')
             except Exception as e:
                 print(f"SMTP Error: Could not send verification email. Details: {e}")
-                messages.warning(request, 'OTP generated (printed to server console). Email transmission failed.')
+                messages.warning(request, f"Email transmission failed. Your OTP is: {user.otp} (Use this to verify your account!)")
                 
             request.session['verify_email'] = user.email
             return redirect('verify_otp')
@@ -137,12 +137,12 @@ def resend_otp(request):
             if sent:
                 return JsonResponse({'status': 'success', 'message': 'A new security code has been sent to your email.'})
             else:
-                return JsonResponse({'status': 'success', 'message': 'New OTP generated! (Failed to send email, please check server logs)'})
+                return JsonResponse({'status': 'success', 'message': f'New OTP generated! Your OTP is: {user.otp} (Email sending failed)'})
                 
         if sent:
             messages.success(request, 'A new verification code has been dispatched.')
         else:
-            messages.warning(request, 'New OTP generated on server. Email delivery failed.')
+            messages.warning(request, f'New OTP generated on server. Your OTP is: {user.otp} (Email delivery failed)')
         return redirect('verify_otp')
     except User.DoesNotExist:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
